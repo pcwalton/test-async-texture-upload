@@ -47,20 +47,23 @@ import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL10;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
-public class AsyncTextureUploader {
-    private final ExecutorService mExecutor;
-
-    public AsyncTextureUploader(EGLConfig config) {
-        mExecutor = Executors.newSingleThreadExecutor();
-
-        EGLContext parentContext = ((EGL10)EGLContext.getEGL()).eglGetCurrentContext();
-        initEGL(parentContext, config);
+public class AsyncGLExecutorFactory {
+    private AsyncGLExecutorFactory() {
+        // Don't call this. This class contains only static methods.
     }
 
-    private void initEGL(final EGLContext parentContext, final EGLConfig config) {
-        mExecutor.submit(new Runnable() {
+    public static ExecutorService createAsyncGLExecutor(EGLConfig config) {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        EGLContext parentContext = ((EGL10)EGLContext.getEGL()).eglGetCurrentContext();
+        performEGLInitialization(executor, parentContext, config);
+        return executor;
+    }
+
+    private static void performEGLInitialization(ExecutorService executor,
+                                                 final EGLContext parentContext,
+                                                 final EGLConfig config) {
+        executor.submit(new Runnable() {
             @Override
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
@@ -84,18 +87,6 @@ public class AsyncTextureUploader {
                     throw new RuntimeException("eglCreatePbufferSurface() failed");
 
                 egl.eglMakeCurrent(display, surface, surface, context);
-            }
-        });
-    }
-
-    /** Asynchronously updates the given EGL texture. */
-    public Future<?> updateTexture(final int textureID, final Runnable updateTexture) {
-        return mExecutor.submit(new Runnable() {
-            @Override
-            public void run() {
-                GLES11.glBindTexture(GLES11.GL_TEXTURE_2D, textureID);
-                updateTexture.run();
-                GLES11.glFinish();  // This actually updates the texture.
             }
         });
     }

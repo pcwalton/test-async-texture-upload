@@ -71,6 +71,8 @@ Java_org_mozilla_gecko_gfx_AndroidGLExtensions_createEGLImageFromTexture(JNIEnv 
                                                                          jint textureID)
 {
     EGLDisplay eglDisplay = eglGetCurrentDisplay();
+    __android_log_print(ANDROID_LOG_ERROR, "TATU", "### eglQueryAPI: %d",
+                        (int)eglQueryAPI());
     __android_log_print(ANDROID_LOG_ERROR, "TATU", "### eglGetCurrentDisplay error: %x",
                         (unsigned)eglGetError());
     EGLContext eglContext = eglGetCurrentContext();
@@ -79,6 +81,7 @@ Java_org_mozilla_gecko_gfx_AndroidGLExtensions_createEGLImageFromTexture(JNIEnv 
     __android_log_print(ANDROID_LOG_ERROR, "TATU", "### eglGetCurrentContext is broken? %d",
                         (int)(eglContext == EGL_NO_CONTEXT));
 
+    __android_log_print(ANDROID_LOG_ERROR, "TATU", "### Texture ID: %d", (int)textureID);
     EGLClientBuffer clientBuffer = reinterpret_cast<EGLClientBuffer>(textureID);
     EGLImageKHR image = eglCreateImageKHR(eglDisplay, eglContext,
                                           EGL_GL_TEXTURE_2D_KHR, clientBuffer,
