@@ -34,7 +34,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package org.mozilla.gecko;
+package org.mozilla.gecko.gfx;
 
 public class AndroidGLExtensions {
     private AndroidGLExtensions() {
